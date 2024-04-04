@@ -12,13 +12,14 @@ jobs:
 
     - name: Setup Dependencies
       run: |
-        sudo apt install sqlite 
+        sudo apt update
+        sudo apt install -y sqlite3
 
-    - name: create 
+    - name: Prepare Files
       run: |
-        mkdir temporary && cp -rf 
-        cp DEBIAN temporary && cp -rf data temporary
-
+        mkdir -p temporary/DEBIAN
+        cp -r DEBIAN temporary/
+        cp -r data temporary/
 
     - name: Build Debian Package
       run: |
