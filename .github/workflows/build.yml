@@ -12,16 +12,21 @@ jobs:
 
     - name: Setup Dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y dpkg-dev debhelper
+        sudo apt install sqlite 
+
+    - name: create 
+      run: |
+        mkdir temporary && cp -rf 
+        cp DEBIAN temporary && cp -rf data temporary
+
 
     - name: Build Debian Package
       run: |
-        cd path/to/your/package
-        dpkg-deb --build ./
+        dpkg-deb --build temporary
+        mv temporary.deb tst_v.1.0_all.deb
 
     - name: Upload Debian Package
       uses: actions/upload-artifact@v2
       with:
         name: my-debian-package
-        path: path/to/your/package/*.deb
+        path: tst_v.1.0_all.deb
