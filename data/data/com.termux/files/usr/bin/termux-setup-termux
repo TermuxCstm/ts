@@ -65,25 +65,26 @@ function apt_install() {
 }
 
 function apt_search() {
-	while true; do
-		tput reset
-		tput cup 24 0
-		echo "Enter the package name to search for:"
-		tput cup 25 0
-		read -r pkg
-		tput reset
-		apt search "$pkg"
-		tput cup 24 0
-		echo "Press Enter..."
-		tput cup 25 0
-		read choice
-		case $choice in
-			*)
-				tput reset
-				terminal
-				::
-		esac
-	done
+    while true; do
+        tput reset
+        tput cup 24 0
+        echo "Enter the package name to search for:"
+        tput cup 25 0
+        read -r pkg
+        tput reset
+        apt search "$pkg"
+        tput cup 24 0
+        echo "Press Enter..."
+        tput cup 25 0
+        read choice
+        case $choice in
+            *)
+                tput reset
+                terminal
+                ;;
+        esac
+    done
+}
 
 function install_setup() {
     tput reset
@@ -124,8 +125,8 @@ function install_setup() {
     fi
     
     sleep 2
+    return
 }
-
 
 declare -A cmds=(
 	[":help"]="print_help"
