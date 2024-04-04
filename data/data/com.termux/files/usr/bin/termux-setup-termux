@@ -1,0 +1,163 @@
+#!/bin/bash
+
+tput reset
+
+cmd_list="/data/data/com.termux/files/usr/etc/ts/cmd.list"
+
+db_path="/data/data/com.termux/files/usr/share/ts/db/setup.db"
+
+# Initialize command list file
+echo ":help - Show this help message
+:list - List all commands
+:AptInstall - Install a package using APT
+:AptSearch - Search for a package using APT
+:InstallSetup - Run installation setup
+:exit - Exit the terminal" > "$cmd_list"
+
+function print_help() {
+	tput reset
+	while true; do
+		tput cup 0 0
+		echo "Usage:"
+		echo ":<command>"
+		echo "Run :list for listing all commands"
+		tput cup 24 0
+		echo "Press Enter to return..."
+		tput cup 25 0
+		read choice
+		if [ -z "$choice" ]; then
+			break
+		fi
+	done
+}
+
+function list_commands() {
+	tput reset
+	local info=$(cat "$cmd_list")
+	tput cup 0 0
+	echo "$info"
+	tput cup 24 0
+	echo "Press Enter to return..."
+	tput cup 25 0
+	read -r
+}
+
+function apt_install() {
+	while true; do
+		tput reset
+		tput cup 24 0
+		echo "Enter the package name to install:"
+		tput cup 25 0
+		read -r pkg
+		tput reset
+		apt install "$pkg"
+		tput cup 24 0
+		echo "Press Enter..."
+		tput cup 25 0
+		read choice
+		case $choice in
+			*)
+				tput reset
+				terminal
+				;;
+		esac
+	done
+}
+
+function apt_search() {
+	while true; do
+		tput reset
+		tput cup 24 0
+		echo "Enter the package name to search for:"
+		tput cup 25 0
+		read -r pkg
+		tput reset
+		apt search "$pkg"
+		tput cup 24 0
+		echo "Press Enter..."
+		tput cup 25 0
+		read choice
+		case $choice in
+			*)
+				tput reset
+				terminal
+				::
+		esac
+	done
+
+function install_setup() {
+    tput reset
+    tput cup 24 0
+    echo "Enter Setup Name:"
+    read -r setup_name
+
+    if [ -z "$setup_name" ]; then
+        echo "Error: Setup Name cannot be empty."
+        sleep 2
+        return
+    fi
+
+    tput reset
+    tput cup 24 0
+    echo "Enter Setup URL:"
+    read -r setup_url
+
+    if [ -z "$setup_url" ]; then
+        echo "Error: Setup URL cannot be empty."
+        sleep 2
+        return
+    fi
+
+    tput reset
+    tput cup 24 0
+    echo "Downloading setup file..."
+    
+    # Herunterladen der Datei mit curl
+    curl -OL "$setup_url"
+    
+    if [ $? -eq 0 ]; then
+        tput cup 24 0
+        echo "Setup '$setup_name' was successfully downloaded."
+    else
+        tput cup 24 0
+        echo "Error: Failed to download setup file."
+    fi
+    
+    sleep 2
+}
+
+
+declare -A cmds=(
+	[":help"]="print_help"
+	[":list"]="list_commands"
+	[":AptInstall"]="apt_install"
+	[":AptSearch"]="apt_search"
+	[":InstallSetup"]="install_setup"
+	[":exit"]="exit_terminal"
+	[":PlugInstall"]="exit 0"
+)
+
+function exit_terminal() {
+	tput reset
+	exit 0
+}
+
+function terminal() {
+	while true; do
+		tput reset
+		tput cup 24 0
+		echo "Type your command:"
+		tput cup 25 0
+		read -r cmd
+		if [[ -n "${cmds[$cmd]}" ]]; then
+			${cmds[$cmd]}
+		else
+			tput cup 24 0
+			echo "Command not found"
+			sleep 2
+		fi
+	done
+}
+
+terminal
+

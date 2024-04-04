@@ -1,0 +1,8 @@
+Package: termux-setup-termux
+Version: 1.0
+Architecture: all
+Section: utils
+Priority: important
+Depends: bash, sqlite
+Maintainer: alex-krefting <termuxmaster99@gmail.com>
+Description: An Settuptool for Termux

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#db_path=/data/data/com.termux/files/usr/share/ts/setup.db
+db_path=setup.db
+
+read -p "name: " name
+read -p "url: ," url
+
+query="INSERT INTO setup_url (name, url) VALUES ('$name', '$url');"
+
+print("Start Wrinting....") && sqlite3 "$db_path" "$query" && echo "Done

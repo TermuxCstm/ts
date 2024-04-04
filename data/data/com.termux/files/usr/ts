@@ -1,0 +1,158 @@
+#!/bin/bash
+
+tput reset
+
+cmd_list="data/data/com.termux/files/usr/etc/ts/cmd.list"
+
+db_path="data/data/com.termux/files/usr/share/ts/db/setup.db"
+
+# Initialize command list file
+echo ":help - Show this help message
+:list - List all commands
+:AptInstall - Install a package using APT
+:AptSearch - Search for a package using APT
+:InstallSetup - Run installation setup
+:exit - Exit the terminal" > "$cmd_list"
+
+function print_help() {
+	tput reset
+	while true; do
+		tput cup 0 0
+		echo "Usage:"
+		echo ":<command>"
+		echo "Run :list for listing all commands"
+		tput cup 24 0
+		echo "Press Enter to return..."
+		tput cup 25 0
+		read choice
+		if [ -z "$choice" ]; then
+			break
+		fi
+	done
+}
+
+function list_commands() {
+	tput reset
+	local info=$(cat "$cmd_list")
+	tput cup 0 0
+	echo "$info"
+	tput cup 24 0
+	echo "Press Enter to return..."
+	tput cup 25 0
+	read -r
+}
+
+function apt_install() {
+	while true; do
+		tput reset
+		tput cup 24 0
+		echo "Enter the package name to install:"
+		tput cup 25 0
+		read -r pkg
+		tput reset
+		apt install "$pkg"
+		tput cup 24 0
+		echo "Press Enter..."
+		tput cup 25 0
+		read choice
+		case $choice in
+			*)
+				tput reset
+				terminal
+				;;
+		esac
+	done
+}
+
+function apt_search() {
+	while true; do
+		tput reset
+		tput cup 24 0
+		echo "Enter the package name to search for:"
+		tput cup 25 0
+		read -r pkg
+		
+		# Überprüfen, ob der Paketname leer ist
+		if [ -z "$pkg" ]; then
+			echo "Fehler: Paketname darf nicht leer sein."
+			sleep 2
+		else
+			# Paketinformationen suchen und anzeigen
+			tput reset
+			apt search "$pkg"
+			
+			tput cup 24 0
+			echo "Press Enter..."
+			tput cup 25 0
+			read choice
+			case $choice in
+				*)
+					tput reset
+					terminal
+					;;
+			esac
+		fi
+	done
+}
+
+function install_setup() {
+	tput reset
+	tput cup 24 0
+	echo "Setups in der Datenbank:"
+	
+	# SQL-Abfrage, um alle Setups aus der Datenbank zu lesen
+	select_sql="SELECT name FROM setup_url;"
+	
+	# SQL-Abfrage ausführen und Ergebnisse in eine Variable speichern
+	setups=$(sqlite3 "$db_path" "$select_sql")
+	
+	# Zeilennummer für die Anzeige der Setups
+	line=25
+	
+	# Ausgabe der Setups
+	echo "$setups" | while IFS= read -r setup; do
+		tput cup $line 0
+		echo "$setup"
+		((line++))
+	done
+	
+	# Warten auf Benutzerbestätigung, bevor zum Hauptmenü zurückgekehrt wird
+	tput cup $line 0
+	echo "Drücken Sie Enter, um zum Hauptmenü zurückzukehren..."
+	read -r
+}
+
+
+
+declare -A cmds=(
+	[":help"]="print_help"
+	[":list"]="list_commands"
+	[":AptInstall"]="apt_install"
+	[":AptSearch"]="apt_search"
+	[":InstallSetup"]="install_setup"
+	[":exit"]="exit_terminal"
+)
+
+function exit_terminal() {
+	tput reset
+	exit 0
+}
+
+function terminal() {
+	while true; do
+		tput reset
+		tput cup 24 0
+		echo "Type your command:"
+		tput cup 25 0
+		read -r cmd
+		if [[ -n "${cmds[$cmd]}" ]]; then
+			${cmds[$cmd]}
+		else
+			tput cup 24 0
+			echo "Command not found"
+			sleep 2
+		fi
+	done
+}
+
+terminal
